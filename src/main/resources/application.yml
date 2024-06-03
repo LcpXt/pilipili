@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/project?useSSL=false&characterEncoding=utf8&serverTimezone=UTC
+      username: root
+      password: lcp1
+      max-active: 200
+      initial-size: 10
+      max-wait: 30000
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  port: 8080
+
+my:
+  project:
+    param:
+      head-img: /assets/images/background.jpeg
+      salt: llccpp
+      code:
+        expiration-time: 120
