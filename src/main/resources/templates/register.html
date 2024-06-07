@@ -59,7 +59,8 @@
 
     <!-- Custom Js-->
     <script th:src="@{/assets/js/custom.js}"></script>
-    <script th:src="@{assets/js/axios.js}"></script>
+    <script th:src="@{/assets/js/axios.js}"></script>
+    <script th:src="@{/assets/js/md5.js}"></script>
 </head>
 <body>
 
@@ -91,7 +92,6 @@
 											</span>
                                     <input type="text" class="form-control" placeholder="用户名" id="username" name="username">
                                 </div>
-                                <!-- TODO 改良后的邮箱文本框-->
                                 <div class="input-icon form-group">
                                     <div class="input-group">
                                         <span class="input-icon-addon search-icon input-group-prepend" style="z-index: 100">
@@ -115,7 +115,7 @@
 												<i class="zmdi zmdi-lock"></i>
 											</span>
                                     <input type="password" class="form-control mb-0" id="password" name="password"
-                                           placeholder="密码">
+                                           placeholder="至少包含一个特殊字符一个大小写字母">
                                 </div>
                                 <div class="input-icon form-group">
 											<span class="input-icon-addon search-icon">
@@ -250,25 +250,16 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
 <script>
 
-    // 现在有一个很主流的发送异步请求的js的工具包 jquery  ->   axios
+    // 用户名校验结果
     let usernameChecked = false;
+    // 验证码校验结果
     let codeChecked = false;
+
+    // 当文本框失去焦点时 axios 异步校验用户名是否存在
     let usernameInput = document.getElementById('username');
     usernameInput.onblur = function () {
-
-        // 向给定ID的用户发起请求
-        // let xmlHttpRequest = new XMLHttpRequest();
-        // xmlHttpRequest.open('GET', '/user/checkUsername/' + usernameInput.value, true);
-        // xmlHttpRequest.send();
-        //
-        // xmlHttpRequest.onreadystatechange = function () {
-        //     if (xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200) {
-        //         alert(xmlHttpRequest.responseText);
-        //     }
-        // }
         let usernamePattern = /^[a-zA-Z0-9]{3,12}$/;
         if (usernamePattern.test(usernameInput.value)) {
             axios({
@@ -288,33 +279,17 @@
             swal('用户名格式不符合要求', '', 'error');
             usernameChecked = false;
         }
+
+
+
     }
 
-    let codeElement = document.getElementById('code');
-    codeElement.onblur = function (){
-        axios({
-            method: "GET",
-            url: '/user/checkCode/' + codeElement.value + '/' + emailInput.value
-        }).then(function (response){
-            if (response.data.status === 'SUCCESS'){
-                codeChecked = true;
-            }
-        })
-    }
-
-    let sendButton = document.getElementById('send-button');
+    // 发送邮件
+    // 当用户点击发送按钮时 axios异步让服务端向指定邮箱发送 邮件 并缓存 邮箱: 验证码 的kv对
     let emailInput = document.getElementById('email');
+    let sendButton = document.getElementById('send-button');
     sendButton.onclick = function () {
-        // 向给定ID的用户发起请求
-        // let xmlHttpRequest = new XMLHttpRequest();
-        // xmlHttpRequest.open('GET', '/user/checkEmail/' + emailInput.value, true);
-        // xmlHttpRequest.send();
-        //
-        // xmlHttpRequest.onreadystatechange = function () {
-        //     if (xmlHttpRequest.readyState === 4 && xmlHttpRequest.status === 200) {
-        //         alert(xmlHttpRequest.responseText);
-        //     }
-        // }
+
         let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         let checkedResult = emailPattern.test(emailInput.value);
 
@@ -329,6 +304,23 @@
         } else {
             swal('邮箱格式不符合规则', '', 'error');
         }
+    }
+
+    // 校验验证码
+    let codeElement = document.getElementById('code');
+    codeElement.onblur = function () {
+        axios({
+            method: 'GET',
+            url: '/user/checkCode/' + codeElement.value + '/' + emailInput.value
+        }).then(function (response) {
+            if (response.data.status === 'SUCCESS') {
+                codeChecked = true;
+                // 这个不要了 交互太多
+                // swal('验证码正确', '', 'success');
+            } else {
+                codeChecked = false;
+            }
+        })
     }
 
     // 密码是否符合正则校验
@@ -347,27 +339,132 @@
         console.log(passwordPattern.test(passwordPattern.value));
     }
 
+    // passwordElement.onblur = () => {
+    //
+    // }
+
+    // 表单提交前验证
+    // 当所有校验结果为true时 表单提交
     let registerForm = document.getElementById('register-form');
-    registerForm.onsubmit = function (){
+    registerForm.onsubmit = function () {
 
         let password = document.getElementById('password').value;
         let checkPassword = document.getElementById('checkPassword').value;
         let checkBoxElement = document.getElementById('agree');
-
+        // 校验通过时 对密码进行md5加密 防止F12解析查看
         if (password === checkPassword && usernameChecked && codeChecked && passwordChecked && checkBoxElement.checked) {
             document.getElementById('password').value = b64_md5(password);
             document.getElementById('checkPassword').value = b64_md5(password);
+            console.log("加密后密码："+password.value);
             return true;
         }
-        console.log("密码一致性" + password === checkPassword)
-        console.log("用户名检验" + usernameChecked)
-        console.log("验证码检验" + codeChecked)
-        console.log("勾选框检验" + document.getElementById('agree').checked)
-
+        // 校验不通过时 将所有变量初始为false状态
+        // 看看谁是false 这个sweet alert 就来一个具体的提示 让用户去更改具体的注册表单内容
         swal('校验不通过', '', 'error');
+
         return false;
+
     }
 
 </script>
+<!--<script>-->
+
+<!--    // 现在有一个很主流的发送异步请求的js的工具包 jquery  ->   axios-->
+<!--    let usernameChecked = false;-->
+<!--    let codeChecked = false;-->
+<!--    let usernameInput = document.getElementById('username');-->
+<!--    usernameInput.onblur = function () {-->
+<!--        -->
+<!--        let usernamePattern = /^[a-zA-Z0-9]{3,12}$/;-->
+<!--        if (usernamePattern.test(usernameInput.value)) {-->
+<!--            axios({-->
+<!--                method: 'GET',-->
+<!--                url: '/user/checkUsername/' + usernameInput.value-->
+<!--            }).then(function (response) {-->
+<!--                if (response.data.status === 'SUCCESS') {-->
+<!--                    swal(response.data.message, '', 'success')-->
+<!--                    // 如果不存在 将校验结果设置为true-->
+<!--                    usernameChecked = true;-->
+<!--                } else {-->
+<!--                    swal(response.data.message, '', 'error');-->
+<!--                    usernameChecked = false;-->
+<!--                }-->
+<!--            });-->
+<!--        } else {-->
+<!--            swal('用户名格式不符合要求', '', 'error');-->
+<!--            usernameChecked = false;-->
+<!--        }-->
+<!--    }-->
+
+<!--    let codeElement = document.getElementById('code');-->
+<!--    codeElement.onblur = function (){-->
+<!--        axios({-->
+<!--            method: "GET",-->
+<!--            url: '/user/checkCode/' + codeElement.value + '/' + emailInput.value-->
+<!--        }).then(function (response){-->
+<!--            if (response.data.status === 'SUCCESS'){-->
+<!--                codeChecked = true;-->
+<!--            }-->
+<!--        })-->
+<!--    }-->
+
+<!--    let sendButton = document.getElementById('send-button');-->
+<!--    let emailInput = document.getElementById('email');-->
+<!--    sendButton.onclick = function () {-->
+<!--        -->
+<!--        let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;-->
+<!--        let checkedResult = emailPattern.test(emailInput.value);-->
+
+
+<!--        if (emailPattern.test(emailInput.value)) {-->
+<!--            axios({-->
+<!--                method: 'GET',-->
+<!--                url: '/user/sendEmail/' + emailInput.value + '/0'-->
+<!--            }).then(function (response) {-->
+<!--                response.data.status === 'SUCCESS' ? swal(response.data.message, '', 'success') : swal(response.data.message, '', 'error');-->
+<!--            });-->
+<!--        } else {-->
+<!--            swal('邮箱格式不符合规则', '', 'error');-->
+<!--        }-->
+<!--    }-->
+
+<!--    // 密码是否符合正则校验-->
+<!--    let passwordChecked = false;-->
+<!--    let passwordElement = document.getElementById('password');-->
+<!--    passwordElement.onblur = function () {-->
+<!--        let passwordPattern = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/;-->
+<!--        if (!passwordPattern.test(passwordElement.value)) {-->
+<!--            swal("密码不符合格式要求", "", "error");-->
+<!--            // 防止用户第一次输入密码时可用 但是后续又改动为一个不可用的密码 必须将校验结果还原为false-->
+<!--            passwordChecked = false;-->
+<!--        } else {-->
+<!--            // 如果用户密码符合正则 那么将校验结果置为true 用于后续的表单提交前验证-->
+<!--            passwordChecked = true;-->
+<!--        }-->
+<!--        console.log(passwordPattern.test(passwordPattern.value));-->
+<!--    }-->
+
+<!--    let registerForm = document.getElementById('register-form');-->
+<!--    registerForm.onsubmit = function (){-->
+
+<!--        let password = document.getElementById('password').value;-->
+<!--        let checkPassword = document.getElementById('checkPassword').value;-->
+<!--        let checkBoxElement = document.getElementById('agree');-->
+
+<!--        if (password === checkPassword && usernameChecked && codeChecked && passwordChecked && checkBoxElement.checked) {-->
+<!--            document.getElementById('password').value = b64_md5(password);-->
+<!--            document.getElementById('checkPassword').value = b64_md5(password);-->
+<!--            return true;-->
+<!--        }-->
+<!--        console.log("密码一致性" + password === checkPassword)-->
+<!--        console.log("用户名检验" + usernameChecked)-->
+<!--        console.log("验证码检验" + codeChecked)-->
+<!--        console.log("勾选框检验" + document.getElementById('agree').checked)-->
+
+<!--        swal('校验不通过', '', 'error');-->
+<!--        return false;-->
+<!--    }-->
+
+<!--</script>-->
 </body>
 </html>

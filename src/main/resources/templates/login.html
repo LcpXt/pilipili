@@ -109,6 +109,9 @@
                 </div>
             </div>
         </div>
+        <script th:if="${fail != null}">
+            swal('用户名或者密码不正确, 请检查', '', 'error');
+        </script>
         <script>
             let loginFormElement = document.getElementById('login-form');
             loginFormElement.onsubmit = function (){

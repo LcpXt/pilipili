@@ -18,6 +18,8 @@
 --
 -- Table structure for table `t_commet`
 --
+CREATE DATABASE IF NOT EXISTS `pilipili`;
+Use `pilipili`;
 
 DROP TABLE IF EXISTS `t_commet`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

@@ -1,6 +1,7 @@
 package com.colin.bh.controller;
 
 import com.colin.bh.bean.User;
+import com.colin.bh.exception.NullFileException;
 import com.colin.bh.service.UserService;
 import com.colin.bh.util.response.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.Multipart;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.io.IOException;
 
 /**
  * 2024年03月23日16:44
@@ -52,7 +56,7 @@ public class UserController {
     }
 
     @RequestMapping("/doRegister")
-    public String doRegister(User user, Model model) {
+    public String doRegister(@Valid User user, Model model) {
         if (!userService.doRegister(user)) {
             model.addAttribute("fail", null);
             return "register";
@@ -103,5 +107,11 @@ public class UserController {
         //因为用户可能刷新浏览器
         //防止因为地址栏不变导致的表单重复提交
         return "redirect:/video/getHomeVideos";
+    }
+    @RequestMapping("/headImgload")
+    @ResponseBody
+    public  ResponseEntity<String> headImgLoad(@RequestParam("headImg") MultipartFile headImg,
+                                                HttpSession session) throws IOException, NullFileException {
+        return userService.headImgUpload(headImg, session);
     }
 }

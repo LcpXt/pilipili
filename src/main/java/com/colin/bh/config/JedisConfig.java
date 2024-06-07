@@ -16,7 +16,7 @@ public class JedisConfig {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(200);
         jedisPoolConfig.setMaxWaitMillis(60000);
-        return new JedisPool(jedisPoolConfig);
+        return new JedisPool(jedisPoolConfig, "117.78.8.44", 6379);
     }
 
 }

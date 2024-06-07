@@ -7,6 +7,10 @@
         INSERT INTO t_user VALUES
         (NULL, #{username}, #{password}, #{email}, #{registerTime}, #{updateTime}, #{lastLoginTime}, #{userType}, #{age}, #{sex}, #{expirationDate}, #{headImg}, #{phoneNumber})
     </insert>
+    <insert id="insertHeadImg">
+        INSERT INTO t_head_img VALUES
+        (NULL, #{user.id}, #{uploadTime}, #{originalPath}, #{mappingPath}, #{imgType}, #{imgSize}, #{originalName})
+    </insert>
     <update id="updatePasswordByEmail">
         UPDATE t_user SET password = #{param2} WHERE email = #{param1}
     </update>

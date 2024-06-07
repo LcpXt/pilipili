@@ -33,5 +33,8 @@ public class RouterController {
         model.addAttribute("email", email);
         return "changePassword";
     }
-
+    @RequestMapping("/toPersonal")
+    public String toPersonal() {
+        return "personalCenter";
+    }
 }

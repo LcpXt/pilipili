@@ -1,5 +1,6 @@
 package com.colin.bh.mapper;
 
+import com.colin.bh.bean.HeadImg;
 import com.colin.bh.bean.User;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +21,6 @@ public interface UserMapper {
     User selectUserByUsernameAndPassword(String username, String finalPassword);
 
     void updateLastLoginTime(Timestamp currentTime, String username);
+
+    void insertHeadImg(HeadImg headImg);
 }
